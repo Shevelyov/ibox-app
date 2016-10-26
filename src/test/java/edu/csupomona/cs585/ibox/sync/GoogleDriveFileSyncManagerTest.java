@@ -31,15 +31,31 @@ public class GoogleDriveFileSyncManagerTest {
     private Drive.Files.Insert insertFiles;
 
     @Mock
+    private Drive.Files.Delete deleteFiles;
+
+    @Mock
     private Drive.Files.List list;
 
     @Mock
     private Drive.Files.Update updateFiles;
 
+    private FileList fileList;
+    private File mockFile;
+    private List<File> mockList;
+
     @Before
     public void setUp(){
+        fileList = new FileList();
+        mockFile = new File();
+        mockFile.setTitle("test");
+        mockFile.setId("test123456");
+        mockList = new ArrayList<>();
+        mockList.add(mockFile);
+        fileList.setItems(mockList);
+
         when(drive.files()).thenReturn(files);
         try{
+            when(list.execute()).thenReturn(fileList);
             when(files.list()).thenReturn(list);
         }
         catch (IOException e){
@@ -60,28 +76,25 @@ public class GoogleDriveFileSyncManagerTest {
     }
 
     @Test
-    @Ignore
     public void testUpdateFile(){
-        java.io.File fileToUpdate = Mockito.mock(java.io.File.class);
+        java.io.File fileToUpdate = new java.io.File("D:\\GOdir\\test");
         try {
-            when(drive.files().update(Mockito.any(), Mockito.any())).thenReturn(updateFiles);
+            when(drive.files().update(Mockito.anyString(), Mockito.any(), Mockito.any())).thenReturn(updateFiles);
             when(updateFiles.execute()).thenReturn(new File());
             fileSyncManager.updateFile(fileToUpdate);
+            verify(updateFiles, Mockito.times(1)).execute();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     @Test
-    @Ignore
     public void testDeleteFile(){
-        FileList fileList = new FileList();
-        fileList.put("Test", 1);
-        java.io.File fileToDelete = Mockito.mock(java.io.File.class);
+        java.io.File fileToDelete = new java.io.File("D:\\GOdir\\test");
         try {
-            when(list.execute()).thenReturn(fileList);
-            when(list.execute().getItems()).thenReturn(fileList.getItems());
+            when(drive.files().delete("test123456")).thenReturn(deleteFiles);
             fileSyncManager.deleteFile(fileToDelete);
+            verify(deleteFiles, Mockito.times(1)).execute();
         } catch (IOException e) {
             e.printStackTrace();
         }
